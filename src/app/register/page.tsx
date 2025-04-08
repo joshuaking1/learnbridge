@@ -70,7 +70,7 @@ export default function RegisterPage() {
 
     try {
       // Make API call to backend auth-service
-      const response = await fetch('http://localhost:3002/api/auth/register', { // Use your Auth Service URL/Port
+      const response = await fetch('/api/auth/register', { // Use your Auth Service URL/Port
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

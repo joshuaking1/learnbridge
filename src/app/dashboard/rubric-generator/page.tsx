@@ -71,7 +71,7 @@ export default function RubricGeneratorPage() {
         if (!token) { /* ... auth token check ... */ return; }
 
         try {
-            const response = await fetch('http://localhost:3004/api/ai/generate/rubric', { // AI Service URL
+            const response = await fetch('/api/ai/generate/rubric', { // AI Service URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

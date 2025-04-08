@@ -225,7 +225,7 @@ function StudentContentViewer() {
         }
 
         try {
-            const response = await fetch(`http://localhost:3004/api/content/student-material?${params.toString()}`, {
+            const response = await fetch(`api/content/student-material?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 

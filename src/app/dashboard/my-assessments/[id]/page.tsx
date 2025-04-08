@@ -70,7 +70,7 @@ export default function ViewAssessmentPage() {
                 setErrorLoading(null);
                 console.log(`Fetching assessment with ID: ${assessmentId}`);
                 try {
-                    const response = await fetch(`http://localhost:3005/api/teacher-tools/assessments/${assessmentId}`, { // Use assessment endpoint
+                    const response = await fetch(`/api/teacher-tools/assessments/${assessmentId}`, { // Use assessment endpoint
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
 

@@ -88,7 +88,7 @@ export default function TosBuilderPage() {
             const fetchBooks = async () => {
                 setIsLoadingBooks(true);
                 try {
-                    const response = await fetch('http://localhost:3004/api/ai/processed-documents', {
+                    const response = await fetch('/api/ai/processed-documents', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) throw new Error('Failed to fetch book list');

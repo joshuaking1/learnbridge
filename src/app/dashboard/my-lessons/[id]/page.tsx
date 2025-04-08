@@ -68,7 +68,7 @@ export default function ViewLessonPlanPage() {
                 setErrorLoading(null);
                 console.log(`Fetching lesson plan with ID: ${planId}`);
                 try {
-                    const response = await fetch(`http://localhost:3005/api/teacher-tools/lessons/${planId}`, {
+                    const response = await fetch(`/api/teacher-tools/lessons/${planId}`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
 

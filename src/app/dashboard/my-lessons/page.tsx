@@ -58,7 +58,7 @@ export default function MyLessonPlansPage() {
                 setIsLoadingPlans(true);
                 setErrorLoading(null);
                 try {
-                    const response = await fetch('http://localhost:3005/api/teacher-tools/lessons', {
+                    const response = await fetch('/api/teacher-tools/lessons', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) {

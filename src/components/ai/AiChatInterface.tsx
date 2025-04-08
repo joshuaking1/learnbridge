@@ -46,7 +46,7 @@ export function AiChatInterface() {
                 return;
             }
 
-            const response = await fetch('http://localhost:3004/api/ai/ask', { // AI Service URL
+            const response = await fetch('/api/ai/ask', { // AI Service URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

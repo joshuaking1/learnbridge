@@ -60,7 +60,7 @@ export default function MyAssessmentsPage() {
                 setErrorLoading(null);
                 try {
                     // Use the correct endpoint for fetching assessments
-                    const response = await fetch('http://localhost:3005/api/teacher-tools/assessments', {
+                    const response = await fetch('/api/teacher-tools/assessments', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) {

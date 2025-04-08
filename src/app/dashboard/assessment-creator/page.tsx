@@ -72,7 +72,7 @@ export default function AssessmentCreatorPage() {
         setIsCheckingAiService(true);
         try {
             console.log("Checking AI service availability...");
-            const response = await fetch('http://localhost:3004/api/ai/health');
+            const response = await fetch('/api/ai/health');
             const data = await response.json();
             console.log("AI service health check:", data);
             setIsAiServiceAvailable(response.ok);

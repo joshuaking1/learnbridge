@@ -94,7 +94,7 @@ export default function AdminUploadPage() {
         try {
              setUploadProgress(50); // Simulate progress
 
-            const response = await fetch('http://localhost:3003/api/content/upload/sbc', {
+            const response = await fetch('/api/content/upload/sbc', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`, // Use token from store
