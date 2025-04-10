@@ -41,10 +41,10 @@ interface User {
 export default function DashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    
+
     // --- State to prevent hydration mismatch ---
     const [hasMounted, setHasMounted] = useState(false);
-    
+
     // --- Get state and actions from the store ---
     // Only access auth state after component has mounted
     const { user, isAuthenticated, isLoading: isLoadingAuth, clearAuth } = useAuthStore();
@@ -52,10 +52,10 @@ export default function DashboardPage() {
     // --- Effect to set hasMounted on client ---
     useEffect(() => {
         setHasMounted(true);
-        console.log("Component mounted, auth state:", { 
-            isLoading: isLoadingAuth, 
-            isAuthenticated, 
-            hasUser: !!user 
+        console.log("Component mounted, auth state:", {
+            isLoading: isLoadingAuth,
+            isAuthenticated,
+            hasUser: !!user
         });
     }, [isAuthenticated, user, isLoadingAuth]);
 
@@ -95,7 +95,7 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-arvo font-bold text-white">
                         Welcome, {user?.first_name || 'User'}
                     </h1>
-                    <Button 
+                    <Button
                         onClick={handleLogout}
                         variant="outline"
                         className="bg-white/10 hover:bg-white/20 text-white border-white/20"
@@ -308,7 +308,7 @@ function StudentContentViewer() {
                         <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Error</AlertTitle><AlertDescription>{errorLoadingContent}</AlertDescription></Alert>
                     )}
                     {!isLoadingContent && !errorLoadingContent && contentChunks.length === 0 && (
-                        <p className="text-center text-gray-500 py-6">Select subject and grade, then click "Load Material". No content found for the current selection.</p>
+                        <p className="text-center text-gray-500 py-6">Select subject and grade, then click &quot;Load Material&quot;. No content found for the current selection.</p>
                     )}
                     {!isLoadingContent && !errorLoadingContent && contentChunks.length > 0 && (
                         <ScrollArea className="h-[50vh] p-4 border rounded-md bg-white text-black"> {/* Scrollable content */}

@@ -223,7 +223,7 @@ export default function RubricGeneratorPage() {
                         )}
                         {!isGenerating && !generatedRubric && (
                             <div className="flex items-center justify-center h-[70vh] text-gray-500">
-                                <p>Fill out the form and click "Generate Rubric" to create a rubric.</p>
+                                <p>Fill out the form and click &quot;Generate Rubric&quot; to create a rubric.</p>
                             </div>
                         )}
                         {generatedRubric && (

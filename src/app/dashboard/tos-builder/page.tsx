@@ -335,7 +335,7 @@ export default function TosBuilderPage() {
                         )}
                         {!isGenerating && !generatedTos && (
                             <div className="text-center text-gray-500 h-40 flex items-center justify-center">
-                                Enter details and click "Generate" to see the Table of Specs here.
+                                Enter details and click &quot;Generate&quot; to see the Table of Specs here.
                             </div>
                         )}
                         {/* Display Generated Content */}

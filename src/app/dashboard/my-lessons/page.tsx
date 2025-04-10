@@ -158,7 +158,7 @@ export default function MyLessonPlansPage() {
                          <CardTitle>No Saved Plans Yet</CardTitle>
                      </CardHeader>
                      <CardContent>
-                         <CardDescription className="mb-4">You haven't saved any lesson plans. Generate one using the AI Lesson Planner!</CardDescription>
+                         <CardDescription className="mb-4">You haven&apos;t saved any lesson plans. Generate one using the AI Lesson Planner!</CardDescription>
                          <Link href="/dashboard/lesson-planner">
                              <Button>Go to Lesson Planner</Button>
                          </Link>
