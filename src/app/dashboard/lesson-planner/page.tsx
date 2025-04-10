@@ -111,7 +111,7 @@ export default function LessonPlannerPage() {
         };
         console.log("Saving Lesson Plan:", payload.subject, payload.topic);
         try {
-            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/teacher-tools/lessons', {
+            const response = await fetch('https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools/lessons', {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(payload),
