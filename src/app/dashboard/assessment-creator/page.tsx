@@ -72,7 +72,7 @@ export default function AssessmentCreatorPage() {
         setIsCheckingAiService(true);
         try {
             console.log("Checking AI service availability...");
-            const response = await fetch('/api/ai/health');
+            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/health');
             const data = await response.json();
             console.log("AI service health check:", data);
             setIsAiServiceAvailable(response.ok);
@@ -120,7 +120,7 @@ export default function AssessmentCreatorPage() {
         if (isAiServiceAvailable === false) {
             toast({ 
                 title: "AI Service Unavailable", 
-                description: "The AI service is not running. Please try again later or contact support.", 
+                description: "The AI service is not running. Please try again later or contact the LearnBridgEdu support Team.", 
                 variant: "destructive" 
             });
             setIsGenerating(false);
@@ -137,7 +137,7 @@ export default function AssessmentCreatorPage() {
 
         try {
             console.log("Sending request to AI service...");
-            const response = await fetch('http://localhost:3004/api/ai/generate/assessment', {
+            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/assessment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ export default function AssessmentCreatorPage() {
         console.log("Saving Assessment:", payload.subject, payload.topic);
 
         try {
-            const response = await fetch('http://localhost:3005/api/teacher-tools/assessments', { // Use Teacher Tools Service URL
+            const response = await fetch('https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools/assessments', { // http://localhost:3005/api/teacher-tools/assessments
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

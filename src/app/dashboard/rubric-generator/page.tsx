@@ -71,7 +71,7 @@ export default function RubricGeneratorPage() {
         if (!token) { /* ... auth token check ... */ return; }
 
         try {
-            const response = await fetch('/api/ai/generate/rubric', { // AI Service URL
+            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/rubric', { // AI Service URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -230,10 +230,10 @@ export default function RubricGeneratorPage() {
                             <ScrollArea className="h-[70vh] p-4 border rounded-md bg-white">
                                 <div className="prose prose-sm sm:prose-base max-w-none">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ /* ...table styling components... */
-                                        table: ({node, ...props}) => <table className="table-auto w-full border-collapse border border-slate-400" {...props} />,
-                                        thead: ({node, ...props}) => <thead className="bg-slate-100" {...props} />,
-                                        th: ({node, ...props}) => <th className="border border-slate-300 px-2 py-1 text-left" {...props} />,
-                                        td: ({node, ...props}) => <td className="border border-slate-300 px-2 py-1 align-top" {...props} />, // Added align-top
+                                        table: ({...props}) => <table className="table-auto w-full border-collapse border border-slate-400" {...props} />,
+                                        thead: ({...props}) => <thead className="bg-slate-100" {...props} />,
+                                        th: ({...props}) => <th className="border border-slate-300 px-2 py-1 text-left" {...props} />,
+                                        td: ({...props}) => <td className="border border-slate-300 px-2 py-1 align-top" {...props} />, // Added align-top
                                     }}>
                                         {generatedRubric}
                                     </ReactMarkdown>

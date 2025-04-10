@@ -75,7 +75,7 @@ export default function LessonPlannerPage() {
         console.log("Requesting Lesson Plan:", values);
         if (!token) { /* ... auth check ... */ return; }
         try {
-            const response = await fetch('/api/ai/generate/lesson-plan', {
+            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/lesson-plan', { //'http://localhost:3004/api/ai/generate/lesson-plan
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(values),
@@ -111,7 +111,7 @@ export default function LessonPlannerPage() {
         };
         console.log("Saving Lesson Plan:", payload.subject, payload.topic);
         try {
-            const response = await fetch('http://localhost:3005/api/teacher-tools/lessons', {
+            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/teacher-tools/lessons', {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(payload),
@@ -240,7 +240,7 @@ export default function LessonPlannerPage() {
                         {/* Initial State (Not Loading, No Plan) */}
                         {!isGenerating && !generatedPlan && (
                             <div className="text-center text-gray-500 h-40 flex items-center justify-center">
-                                Enter lesson details and click &quot;Generate&quot; to see the plan here.
+                                Enter lesson details and click "Generate" to see the plan here.
                             </div>
                         )}
                         {/* Display Generated Plan */}
@@ -289,7 +289,7 @@ export default function LessonPlannerPage() {
                             <Alert variant="success" className="w-full bg-green-100 border-green-300 text-green-800">
                                 <AlertTitle>Success</AlertTitle>
                                 <AlertDescription>
-                                    Lesson plan saved successfully. You can view it in &quot;My Lesson Plans&quot;.
+                                    Lesson plan saved successfully. You can view it in "My Lesson Plans".
                                 </AlertDescription>
                             </Alert>
                         )}

@@ -70,7 +70,7 @@ export default function RegisterPage() {
 
     try {
       // Make API call to backend auth-service
-      const response = await fetch('/api/auth/register', { // Use your Auth Service URL/Port
+      const response = await fetch('https://learnbridge-auth-service.onrender.com/api/auth/register', { // Use your Auth Service URL/Port
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -115,191 +115,240 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-brand-darkblue to-brand-midblue">
-      <div className="w-full max-w-md">
-        <Card className="border-none shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-arvo font-bold text-center">Create an account</CardTitle>
-            <CardDescription className="text-center">
+    <div className="min-h-screen w-full py-8 px-4 bg-gradient-to-br from-brand-darkblue to-brand-midblue">
+      <div className="max-w-[450px] mx-auto w-full">
+        <Card className="border-none shadow-xl bg-slate-900/60 backdrop-blur-sm">
+          <CardHeader className="space-y-2 pb-6">
+            <CardTitle className="text-2xl sm:text-3xl font-arvo font-bold text-center text-white">
+              Create an account
+            </CardTitle>
+            <CardDescription className="text-center text-sm sm:text-base text-gray-200">
               Fill in your details to get started
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {/* First Name */}
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">First Name *</div>
-                      <FormControl>
-                        <Input placeholder="e.g., Kwame" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
-                />
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* First Name */}
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="mb-1.5 text-sm font-medium text-gray-100">First Name *</div>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., Joshua" 
+                            {...field} 
+                            disabled={isLoading} 
+                            className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400 text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Surname */}
-                <FormField
-                  control={form.control}
-                  name="surname"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Surname *</div>
-                      <FormControl>
-                        <Input placeholder="e.g., Nkrumah" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
-                />
+                  {/* Surname */}
+                  <FormField
+                    control={form.control}
+                    name="surname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="mb-1.5 text-sm font-medium text-gray-100">Surname *</div>
+                        <FormControl>
+                          <Input 
+                            placeholder="e.g., Segu" 
+                            {...field} 
+                            disabled={isLoading} 
+                            className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400 text-xs" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                 {/* Email */}
-                 <FormField
+                {/* Email */}
+                <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Email *</div>
+                    <FormItem>
+                      <div className="mb-1.5 text-sm font-medium text-gray-100">Email *</div>
                       <FormControl>
-                        <Input type="email" placeholder="your.email@example.com" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
+                        <Input 
+                          type="email" 
+                          placeholder="support@learnbridgedu.com" 
+                          {...field} 
+                          disabled={isLoading} 
+                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                        />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-400 text-xs" />
                     </FormItem>
                   )}
                 />
 
-                 {/* Phone (Optional) */}
-                 <FormField
+                {/* Phone */}
+                <FormField
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Phone Number</div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-100">Phone Number</div>
                       <FormControl>
-                        <Input type="tel" placeholder="+233 XXX XXX XXX" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
+                        <Input 
+                          type="tel" 
+                          placeholder="+233 599 294 673" 
+                          {...field} 
+                          disabled={isLoading} 
+                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                        />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-400 text-xs" />
                     </FormItem>
                   )}
                 />
 
                 {/* Password */}
-                 <FormField
+                <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Password *</div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-100">Password *</div>
                       <FormControl>
-                        <Input type="password" placeholder="********" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
+                        <Input 
+                          type="password" 
+                          placeholder="********" 
+                          {...field} 
+                          disabled={isLoading} 
+                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                        />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-400 text-xs" />
                     </FormItem>
                   )}
                 />
 
-                 {/* School (Optional) */}
+                {/* School */}
                 <FormField
                   control={form.control}
                   name="school"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">School</div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-100">School</div>
                       <FormControl>
-                        <Input placeholder="e.g., Accra High School" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
+                        <Input 
+                          placeholder="e.g., Ghana Senior High School" 
+                          {...field} 
+                          disabled={isLoading} 
+                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                        />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-400 text-xs" />
                     </FormItem>
                   )}
                 />
 
-                {/* Location (Optional) */}
+                {/* Location */}
                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Location</div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-100">Location</div>
                       <FormControl>
-                        <Input placeholder="e.g., Accra, Greater Accra" {...field} disabled={isLoading} className="bg-white/90 text-black placeholder:text-gray-500" />
+                        <Input 
+                          placeholder="e.g., Koforidua, Eastern Region" 
+                          {...field} 
+                          disabled={isLoading} 
+                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                        />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-400 text-xs" />
                     </FormItem>
                   )}
                 />
 
-                {/* Position */}
-                <FormField
-                  control={form.control}
-                  name="position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Position *</div>
-                      <FormControl>
-                        <select 
-                          className="w-full rounded-md border border-input bg-white/90 text-black px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={isLoading}
-                        >
-                          <option value="">Select your position</option>
-                          <option value="Teacher">Teacher</option>
-                          <option value="Student">Student</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* Position */}
+                  <FormField
+                    control={form.control}
+                    name="position"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="mb-1.5 text-sm font-medium text-gray-100">Position *</div>
+                        <FormControl>
+                          <select 
+                            className="w-full rounded-md border border-input bg-white/90 text-black px-3 h-11 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={field.value}
+                            onChange={field.onChange}
+                            disabled={isLoading}
+                          >
+                            <option value="">Select your position</option>
+                            <option value="Teacher">Teacher</option>
+                            <option value="Student">Student</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage className="text-red-400 text-xs" />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Gender */}
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="mb-1.5 text-sm font-medium text-slate-200">Gender *</div>
-                      <FormControl>
-                        <select 
-                          className="w-full rounded-md border border-input bg-white/90 text-black px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={isLoading}
-                        >
-                          <option value="">Select your gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                          <option value="Prefer not to say">Prefer not to say</option>
-                        </select>
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
-                />
+                  {/* Gender */}
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="mb-1.5 text-sm font-medium text-gray-100">Gender *</div>
+                        <FormControl>
+                          <select 
+                            className="w-full rounded-md border border-input bg-white/90 text-black px-3 h-11 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={field.value}
+                            onChange={field.onChange}
+                            disabled={isLoading}
+                          >
+                            <option value="">Select your gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage className="text-red-400 text-xs" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* Submit Button */}
-                <div className="md:col-span-2">
-                  <Button type="submit" className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold" disabled={isLoading}>
-                    {isLoading ? 'Registering...' : 'Create account'}
-                  </Button>
-                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold h-11 mt-6" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Registering...' : 'Create account'}
+                </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <div className="text-sm text-center text-muted-foreground">
+          <CardFooter className="flex flex-col space-y-3 pt-6">
+            <div className="text-sm text-center text-gray-200">
               Already have an account?{" "}
-              <Link href="/login" className="text-brand-orange hover:underline">
+              <Link href="/login" className="text-brand-orange hover:underline font-medium">
                 Sign in
               </Link>
             </div>
-            <Link href="/" className="text-sm text-center text-muted-foreground hover:underline">
+            <Link 
+              href="/" 
+              className="text-sm text-center text-gray-300 hover:underline hover:text-white transition-colors"
+            >
               Back to home
             </Link>
           </CardFooter>

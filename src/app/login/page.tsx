@@ -51,7 +51,7 @@ export default function LoginPage() {
     console.log("Login Attempt:", values);
 
     try {
-         const response = await fetch('/api/auth/login', {
+         const response = await fetch('https://learnbridge-auth-service.onrender.com/api/auth/login', {
            method: 'POST',
            headers: {
              'Content-Type': 'application/json',
@@ -98,28 +98,32 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-brand-darkblue to-brand-midblue">
-      <div className="w-full max-w-md">
-        <Card className="border-none shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-arvo font-bold text-center">Welcome back</CardTitle>
-            <CardDescription className="text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:p-4 bg-gradient-to-br from-brand-darkblue to-brand-midblue">
+      <div className="w-full max-w-md mx-auto">
+        <Card className="border-none shadow-lg bg-white/95 backdrop-blur-sm w-full">
+          <CardHeader className="space-y-2 p-4 sm:p-6">
+            <CardTitle className="text-xl sm:text-2xl font-arvo font-bold text-center text-gray-800">Welcome back</CardTitle>
+            <CardDescription className="text-center text-gray-600 text-sm sm:text-base">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-1.5 text-sm font-medium">Email</div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-700">Email</div>
                       <FormControl>
-                        <Input placeholder="name@example.com" {...field} />
+                        <Input 
+                          placeholder="name@example.com" 
+                          {...field} 
+                          className="bg-white border-gray-300 focus:border-brand-orange focus:ring-brand-orange/20 h-10 sm:h-11 text-base"
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500 text-xs sm:text-sm mt-1" />
                     </FormItem>
                   )}
                 />
@@ -128,28 +132,37 @@ export default function LoginPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="mb-1.5 text-sm font-medium">Password</div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-700">Password</div>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your password" {...field} />
+                        <Input 
+                          type="password" 
+                          placeholder="Enter your password" 
+                          {...field}
+                          className="bg-white border-gray-300 focus:border-brand-orange focus:ring-brand-orange/20 h-10 sm:h-11 text-base"
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500 text-xs sm:text-sm mt-1" />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full bg-brand-orange hover:bg-opacity-90" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-medium h-10 sm:h-11 text-base mt-2" 
+                  disabled={isLoading}
+                >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <div className="text-sm text-center text-muted-foreground">
+          <CardFooter className="flex flex-col space-y-2 p-4 sm:p-6">
+            <div className="text-xs sm:text-sm text-center text-gray-600">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-brand-orange hover:underline">
+              <Link href="/register" className="text-brand-orange hover:underline font-medium">
                 Sign up
               </Link>
             </div>
-            <Link href="/" className="text-sm text-center text-muted-foreground hover:underline">
+            <Link href="/" className="text-xs sm:text-sm text-center text-gray-500 hover:text-gray-700 hover:underline">
               Back to home
             </Link>
           </CardFooter>

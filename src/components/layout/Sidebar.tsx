@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils"; // For combining class names
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/useAuthStore"; // To get user role
+import { useState, useEffect } from "react"; // For managing sidebar state
 
 // Import icons from lucide-react
 import {
@@ -15,12 +16,14 @@ import {
     ClipboardCheck, // Assessment Creator
     ListChecks,    // ToS Builder
     Scaling,       // Rubric Generator
-    GraduationCap, // Student Hub (Placeholder)
-    Users,         // PLC (Placeholder)
-    UploadCloud,   // Admin Upload (Placeholder)
     LogOut,        // Logout
-    Bot             // AI Assistant (Chat)
+    Bot,           // AI Assistant (Chat)
+    Menu,          // Menu icon for mobile toggle
+    X              // Close icon for mobile toggle
 } from "lucide-react";
+
+// Commented out unused icons
+// import { GraduationCap, Users, UploadCloud } from "lucide-react";
 
 // Define navigation items structure
 interface NavItem {
@@ -34,6 +37,12 @@ export function Sidebar() {
     const pathname = usePathname(); // Get current URL path
     const { user, clearAuth } = useAuthStore(); // Get user role and logout action
     const router = useRouter(); // For programmatic navigation on logout
+    const [isOpen, setIsOpen] = useState(false); // State for mobile sidebar
+
+    // Close sidebar when route changes on mobile
+    useEffect(() => {
+        setIsOpen(false);
+    }, [pathname]);
 
     // Define navigation links based on roles
     const navItems: NavItem[] = [
@@ -56,8 +65,8 @@ export function Sidebar() {
     ];
 
     // Filter nav items based on user role
-    const filteredNavItems = navItems.filter(item => 
-        !item.roles || (user?.role && item.roles.includes(user.role as any))
+    const filteredNavItems = navItems.filter(item =>
+        !item.roles || (user?.role && item.roles.includes(user.role as 'teacher' | 'student' | 'admin'))
     );
 
     // Handle logout
@@ -67,59 +76,85 @@ export function Sidebar() {
     };
 
     return (
-        <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-brand-darkblue border-r border-white/10">
-            <div className="flex h-full flex-col">
-                {/* Logo/Brand */}
-                <div className="p-4 border-b border-white/10">
-                    <Link href="/dashboard" className="flex items-center space-x-2">
-                        <span className="text-xl font-arvo font-bold text-white">
-                            LearnBridge<span className="text-brand-orange">Edu</span>
-                        </span>
-                    </Link>
-                </div>
+        <>
+            {/* Mobile Menu Button */}
+            <Button
+                variant="ghost"
+                size="icon"
+                className="fixed top-4 left-4 z-50 md:hidden bg-brand-darkblue text-white hover:bg-white/10"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
 
-                {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto p-4">
-                    <ul className="space-y-2">
-                        {filteredNavItems.map((item) => {
-                            const isActive = pathname === item.href;
-                            return (
-                                <li key={item.href}>
-                                    <Link
-                                        href={item.href}
-                                        className={cn(
-                                            buttonVariants({ variant: "ghost" }),
-                                            "w-full justify-start text-white hover:bg-white/10",
-                                            isActive && "bg-white/10"
-                                        )}
-                                    >
-                                        <item.icon className="mr-2 h-5 w-5" />
-                                        {item.label}
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </nav>
+            {/* Overlay for mobile */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
 
-                {/* User Info & Logout */}
-                <div className="border-t border-white/10 p-4">
-                    <div className="mb-4">
-                        <p className="text-sm font-arvo font-medium text-white">
-                            {user?.first_name} {user?.surname}
-                        </p>
-                        <p className="text-xs text-white/70 capitalize">{user?.role}</p>
+            {/* Sidebar */}
+            <aside className={cn(
+                "fixed left-0 top-0 z-40 h-screen bg-brand-darkblue border-r border-white/10 transition-transform duration-300 ease-in-out",
+                "w-64 transform",
+                "md:translate-x-0", // Always visible on desktop
+                isOpen ? "translate-x-0" : "-translate-x-full" // Toggle on mobile
+            )}>
+                <div className="flex h-full flex-col">
+                    {/* Logo/Brand */}
+                    <div className="p-4 border-b border-white/10">
+                        <Link href="/dashboard" className="flex items-center space-x-2">
+                            <span className="text-xl font-arvo font-bold text-white">
+                                LearnBridge<span className="text-brand-orange">Edu</span>
+                            </span>
+                        </Link>
                     </div>
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-start text-white hover:bg-white/10"
-                        onClick={handleLogout}
-                    >
-                        <LogOut className="mr-2 h-5 w-5" />
-                        Logout
-                    </Button>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 overflow-y-auto p-4">
+                        <ul className="space-y-2">
+                            {filteredNavItems.map((item) => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <li key={item.href}>
+                                        <Link
+                                            href={item.href}
+                                            className={cn(
+                                                buttonVariants({ variant: "ghost" }),
+                                                "w-full justify-start text-white hover:bg-white/10",
+                                                isActive && "bg-white/10"
+                                            )}
+                                        >
+                                            <item.icon className="mr-2 h-5 w-5" />
+                                            {item.label}
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </nav>
+
+                    {/* User Info & Logout */}
+                    <div className="border-t border-white/10 p-4">
+                        <div className="mb-4">
+                            <p className="text-sm font-arvo font-medium text-white">
+                                {user?.first_name} {user?.surname}
+                            </p>
+                            <p className="text-xs text-white/70 capitalize">{user?.role}</p>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-start text-white hover:bg-white/10"
+                            onClick={handleLogout}
+                        >
+                            <LogOut className="mr-2 h-5 w-5" />
+                            Logout
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </aside>
+            </aside>
+        </>
     );
 }

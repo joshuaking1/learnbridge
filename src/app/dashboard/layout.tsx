@@ -10,7 +10,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen">
       <Sidebar /> {/* Render the fixed sidebar */}
       {/* Main content area with padding to offset the sidebar width */}
-      <main className="flex-1 pl-64"> {/* pl-64 matches sidebar width w-64 */}
+      <main className="flex-1 pl-0 pt-16 md:pt-0 md:pl-64 transition-all duration-300 relative z-30"> {/* Added pt-16 for mobile menu button, z-30 for proper stacking */}
         {children} {/* Render the actual page content here */}
       </main>
     </div>

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/useAuthStore'; // <-- Import Auth Store
-import { Loader2 } from 'lucide-react'; // Import Loader
+import { Loader2, ArrowLeft, Upload, FileText } from 'lucide-react'; // Import Loader and icons
 
 // User interface defined in auth store, no need to redefine unless different fields needed
 // interface User { ... }
@@ -65,7 +65,7 @@ export default function AdminUploadPage() {
                 toast({ title: "File Too Large", description: "File size cannot exceed 25MB.", variant: "destructive" });
                 setSelectedFile(null);
                 if (fileInputRef.current) { fileInputRef.current.value = ""; }
-                return;
+                 return;
             }
             setSelectedFile(file);
             setUploadProgress(0);
@@ -94,7 +94,7 @@ export default function AdminUploadPage() {
         try {
              setUploadProgress(50); // Simulate progress
 
-            const response = await fetch('/api/content/upload/sbc', {
+            const response = await fetch('https://content-service-e54f.onrender.com/api/content/upload/sbc', { //'http://localhost:3003/api/content/upload/sbc
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`, // Use token from store
@@ -166,26 +166,31 @@ export default function AdminUploadPage() {
 
     // --- Main Admin Upload Page Content ---
     return (
-        <div className="min-h-screen bg-slate-100 p-8">
+        <div className="min-h-screen bg-slate-100 p-4 sm:p-6 md:p-8">
             <div className="max-w-4xl mx-auto">
-                <header className="mb-8 flex justify-between items-center bg-white p-6 rounded-lg shadow-sm">
+                <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 sm:p-6 rounded-lg shadow-sm">
                     <div>
-                        <h1 className="text-3xl font-bold text-brand-darkblue">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-brand-darkblue">
                             Admin - Upload SBC Document
                         </h1>
-                        <p className="text-slate-500 mt-1">Upload and manage curriculum documents</p>
+                        <p className="text-slate-500 mt-1 text-sm sm:text-base">Upload and manage curriculum documents</p>
                     </div>
-                    <Button variant="outline" onClick={() => router.push('/dashboard')} className="border-brand-darkblue text-brand-darkblue hover:bg-brand-darkblue/10">
+                    <Button 
+                        variant="outline" 
+                        onClick={() => router.push('/dashboard')} 
+                        className="mt-4 sm:mt-0 border-brand-darkblue text-brand-darkblue hover:bg-brand-darkblue/10 flex items-center"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Dashboard
                     </Button>
                 </header>
 
-                <Card className="w-full shadow-md border-0">
-                    <CardHeader className="bg-brand-darkblue/5 border-b border-slate-200">
-                        <CardTitle className="text-brand-darkblue">Upload New Document</CardTitle>
-                        <CardDescription>Select a PDF file (Max 25MB) containing SBC curriculum, handbook, etc.</CardDescription>
+                <Card className="w-full shadow-md border-0 mb-6 sm:mb-8">
+                    <CardHeader className="bg-brand-darkblue/5 border-b border-slate-200 p-4 sm:p-6">
+                        <CardTitle className="text-xl sm:text-2xl text-brand-darkblue">Upload New Document</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">Select a PDF file (Max 25MB) containing SBC curriculum, handbook, etc.</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-6 space-y-6">
+                    <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                         <div className="grid w-full items-center gap-2">
                             <Label htmlFor="sbc-file" className="text-sm font-medium text-slate-700">Select PDF File</Label>
                             <div className="relative">
@@ -203,16 +208,14 @@ export default function AdminUploadPage() {
                         </div>
 
                         {selectedFile && (
-                            <div className="mt-2 p-4 bg-slate-50 rounded-md border border-slate-200">
+                            <div className="mt-2 p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-200">
                                 <div className="flex items-center">
                                     <div className="p-2 bg-brand-darkblue/10 rounded-full mr-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-darkblue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
+                                        <FileText className="h-5 w-5 text-brand-darkblue" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-slate-800">Selected File:</p>
-                                        <p className="text-sm text-slate-600">{selectedFile.name}</p>
+                                        <p className="text-sm text-slate-600 truncate max-w-[200px] sm:max-w-none">{selectedFile.name}</p>
                                         <p className="text-xs text-slate-500 mt-1">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                                     </div>
                                 </div>
@@ -220,34 +223,39 @@ export default function AdminUploadPage() {
                         )}
                         
                         {isUploading && (
-                            <div className="mt-4 space-y-3 p-4 bg-slate-50 rounded-md border border-slate-200">
+                            <div className="mt-4 space-y-3 p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-200">
                                 <div className="flex justify-between items-center">
                                     <p className="text-sm font-medium text-slate-700">Upload Progress:</p>
                                     <p className="text-sm font-medium text-brand-darkblue">{uploadProgress}%</p>
                                 </div>
-                                <Progress value={uploadProgress} className="h-2 bg-slate-200" />
+                                <Progress value={uploadProgress} />
                             </div>
                         )}
 
                         <Button
                             onClick={handleUpload}
                             disabled={!selectedFile || isUploading}
-                            className="w-full bg-brand-darkblue hover:bg-brand-darkblue/90 h-11 text-base font-medium shadow-sm"
+                            className="w-full bg-brand-darkblue hover:bg-brand-darkblue/90 h-11 text-base font-medium shadow-sm flex items-center justify-center"
                         >
                             {isUploading ? (
                                 <div className="flex items-center justify-center">
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                     Uploading...
                                 </div>
-                            ) : 'Upload File'}
+                            ) : (
+                                <div className="flex items-center justify-center">
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Upload File
+                                </div>
+                            )}
                         </Button>
                     </CardContent>
                 </Card>
 
                 {/* TODO: List uploaded documents */}
-                <div className="mt-8 bg-white p-6 rounded-lg shadow-sm">
-                    <h2 className="text-xl font-semibold text-brand-darkblue mb-4">Uploaded Documents</h2>
-                    <p className="text-slate-500">No documents uploaded yet.</p>
+                <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                    <h2 className="text-lg sm:text-xl font-semibold text-brand-darkblue mb-3 sm:mb-4">Uploaded Documents</h2>
+                    <p className="text-slate-500 text-sm sm:text-base">No documents uploaded yet.</p>
                 </div>
             </div>
         </div>

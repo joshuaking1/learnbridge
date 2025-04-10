@@ -58,7 +58,7 @@ export default function MyLessonPlansPage() {
                 setIsLoadingPlans(true);
                 setErrorLoading(null);
                 try {
-                    const response = await fetch('/api/teacher-tools/lessons', {
+                    const response = await fetch('https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools/lessons', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) {
@@ -98,7 +98,7 @@ export default function MyLessonPlansPage() {
         console.log(`Set deletingId to: ${planId}`);
         try {
             console.log(`Sending DELETE request for ID: ${planId} with token: ${token ? 'Exists' : 'MISSING!'}`);
-            const response = await fetch(`http://localhost:3005/api/teacher-tools/lessons/${planId}`, {
+            const response = await fetch(`https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools/lessons/${planId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -158,7 +158,7 @@ export default function MyLessonPlansPage() {
                          <CardTitle>No Saved Plans Yet</CardTitle>
                      </CardHeader>
                      <CardContent>
-                         <CardDescription className="mb-4">You haven&apos;t saved any lesson plans. Generate one using the AI Lesson Planner!</CardDescription>
+                         <CardDescription className="mb-4">You haven't saved any lesson plans. Generate one using the AI Lesson Planner!</CardDescription>
                          <Link href="/dashboard/lesson-planner">
                              <Button>Go to Lesson Planner</Button>
                          </Link>
