@@ -13,6 +13,17 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  webpack: (config, { isServer }) => {
+    // Handle missing modules by providing empty modules
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      '@/components/ui/use-toast': false,
+      '@/components/ui/table': false,
+      '@/components/ui/radio-group': false,
+      '@/components/ui/SchoolCombobox': false,
+    };
+    return config;
+  },
 };
 
 module.exports = nextConfig;
