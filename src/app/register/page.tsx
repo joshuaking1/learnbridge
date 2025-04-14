@@ -98,7 +98,8 @@ export default function RegisterPage() {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...registrationData } = values;
 
-      const response = await fetch('http://localhost:3002/api/auth/register', { // Use your Auth Service URL/Port
+      const authServiceUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'https://learnbridge-auth-service.onrender.com/api/auth';
+      const response = await fetch(`${authServiceUrl}/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

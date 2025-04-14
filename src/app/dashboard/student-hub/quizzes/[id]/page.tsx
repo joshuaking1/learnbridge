@@ -82,7 +82,8 @@ export default function TakeQuizPage() {
                 setQuizResults(null); // Clear previous results if any
                 try {
                     // Fetch questions (no answers)
-                    const response = await fetch(`http://localhost:3006/api/quizzes/${quizId}/questions`, {
+                    const quizServiceUrl = process.env.NEXT_PUBLIC_STUDENT_TOOLS_URL || 'https://learnbridgedu.onrender.com/api/quizzes';
+                    const response = await fetch(`${quizServiceUrl}/${quizId}/questions`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) {
@@ -153,7 +154,8 @@ export default function TakeQuizPage() {
         console.log("Submitting answers:", selectedAnswers);
 
         try {
-            const response = await fetch(`http://localhost:3006/api/quizzes/attempts/${quizId}`, {
+            const quizServiceUrl = process.env.NEXT_PUBLIC_STUDENT_TOOLS_URL || 'https://learnbridgedu.onrender.com/api/quizzes';
+            const response = await fetch(`${quizServiceUrl}/attempts/${quizId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

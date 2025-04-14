@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Trash2, Eye } from "lucide-react";
@@ -59,7 +59,8 @@ export default function MyTosPage() {
                 setErrorLoading(null);
                 try {
                     // Use the correct endpoint for fetching ToS
-                    const response = await fetch('http://localhost:3005/api/teacher-tools/tos', {
+                    const teacherToolsUrl = process.env.NEXT_PUBLIC_TEACHER_TOOLS_URL || 'https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools';
+                    const response = await fetch(`${teacherToolsUrl}/tos`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) {
@@ -92,7 +93,8 @@ export default function MyTosPage() {
         setDeletingId(tosId);
         try {
             // Use the correct endpoint for deleting ToS
-            const response = await fetch(`http://localhost:3005/api/teacher-tools/tos/${tosId}`, {
+            const teacherToolsUrl = process.env.NEXT_PUBLIC_TEACHER_TOOLS_URL || 'https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools';
+            const response = await fetch(`${teacherToolsUrl}/tos/${tosId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -131,9 +133,21 @@ export default function MyTosPage() {
              </header>
 
             {/* Loading State */}
-            {isLoadingTos && ( /* ... Loading UI ... */ )}
+            {isLoadingTos && (
+                <div className="flex justify-center items-center py-16">
+                    <div className="text-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-brand-orange mx-auto mb-4" />
+                        <p className="text-gray-500">Loading your tables of specifications...</p>
+                    </div>
+                </div>
+            )}
             {/* Error State */}
-            {!isLoadingTos && errorLoading && ( /* ... Error Alert ... */ )}
+            {!isLoadingTos && errorLoading && (
+                <Alert variant="destructive" className="mt-6">
+                    <AlertTitle>Error Loading Tables of Specifications</AlertTitle>
+                    <AlertDescription>{errorLoading}</AlertDescription>
+                </Alert>
+            )}
             {/* No ToS State */}
              {!isLoadingTos && !errorLoading && tablesOfSpecs.length === 0 && (
                  <Card className="text-center py-10 mt-6">

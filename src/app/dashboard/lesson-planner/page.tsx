@@ -76,7 +76,8 @@ export default function LessonPlannerPage() {
         console.log("Requesting Lesson Plan:", values);
         if (!token) { /* ... auth check ... */ return; }
         try {
-            const response = await fetch('http://localhost:3004/api/ai/generate/lesson-plan', { //'http://localhost:3004/api/ai/generate/lesson-plan
+            const aiServiceUrl = process.env.NEXT_PUBLIC_AI_SERVICE_URL || 'https://learnbridge-ai-service.onrender.com/api/ai';
+            const response = await fetch(`${aiServiceUrl}/generate/lesson-plan`, {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(values),
@@ -114,7 +115,8 @@ export default function LessonPlannerPage() {
         };
         console.log("Saving Lesson Plan:", payload.subject, payload.topic);
         try {
-            const response = await fetch('http://localhost:3005/api/teacher-tools/lessons', {
+            const teacherToolsUrl = process.env.NEXT_PUBLIC_TEACHER_TOOLS_URL || 'https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools';
+            const response = await fetch(`${teacherToolsUrl}/lessons`, {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(payload),
