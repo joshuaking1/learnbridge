@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select
 import { useAuthStore } from '@/stores/useAuthStore'; // <-- Import Auth Store
 import { Loader2, ArrowLeft, Upload, FileText } from 'lucide-react'; // Import Loader and icons
 
@@ -29,6 +30,7 @@ export default function AdminUploadPage() {
     const [uploadProgress, setUploadProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [hasMounted, setHasMounted] = useState(false); // <-- Add hasMounted state
+    const [audienceType, setAudienceType] = useState<'teacher' | 'student' | 'all'>('all'); // <-- State for audience type
 
     // --- Effect to set hasMounted on client ---
     useEffect(() => {
@@ -90,6 +92,9 @@ export default function AdminUploadPage() {
         setUploadProgress(0);
         const formData = new FormData();
         formData.append('sbcFile', selectedFile);
+        formData.append('audienceType', audienceType); // <-- Append audience type to FormData
+
+        console.log(`Uploading file with audience type: ${audienceType}`);
 
         try {
              setUploadProgress(50); // Simulate progress
@@ -175,9 +180,9 @@ export default function AdminUploadPage() {
                         </h1>
                         <p className="text-slate-500 mt-1 text-sm sm:text-base">Upload and manage curriculum documents</p>
                     </div>
-                    <Button 
-                        variant="outline" 
-                        onClick={() => router.push('/dashboard')} 
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push('/dashboard')}
                         className="mt-4 sm:mt-0 border-brand-darkblue text-brand-darkblue hover:bg-brand-darkblue/10 flex items-center"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -207,6 +212,27 @@ export default function AdminUploadPage() {
                             </div>
                         </div>
 
+                        {/* --- NEW: Audience Type Select --- */}
+                        <div className="grid w-full items-center gap-2">
+                            <Label htmlFor="audience-type" className="text-sm font-medium text-slate-700">Intended Audience *</Label>
+                            <Select
+                                value={audienceType}
+                                onValueChange={(value: 'teacher' | 'student' | 'all') => setAudienceType(value as 'teacher' | 'student' | 'all')}
+                                disabled={isUploading}
+                            >
+                                <SelectTrigger id="audience-type" className="h-10 border-slate-300 focus:border-brand-darkblue focus:ring-brand-darkblue/20">
+                                    <SelectValue placeholder="Select audience..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All (Teachers & Students)</SelectItem>
+                                    <SelectItem value="teacher">Teachers Only</SelectItem>
+                                    <SelectItem value="student">Students Only</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-slate-500">Select who should see the content from this document.</p>
+                        </div>
+                        {/* --- END Audience Type Select --- */}
+
                         {selectedFile && (
                             <div className="mt-2 p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-200">
                                 <div className="flex items-center">
@@ -221,7 +247,7 @@ export default function AdminUploadPage() {
                                 </div>
                             </div>
                         )}
-                        
+
                         {isUploading && (
                             <div className="mt-4 space-y-3 p-3 sm:p-4 bg-slate-50 rounded-md border border-slate-200">
                                 <div className="flex justify-between items-center">

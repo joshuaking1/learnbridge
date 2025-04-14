@@ -1,7 +1,7 @@
 // frontend/src/app/dashboard/assessment-creator/page.tsx
 "use client";
 
-import { useState, useEffect } from "react"; // Added useEffect
+import { useState, useEffect, useCallback } from "react"; // Added useEffect, useCallback
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import * as z from "zod";
@@ -19,7 +19,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast" // Corrected useToast import path
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthStore } from '@/stores/useAuthStore'; // <-- Import Auth Store
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -49,6 +49,27 @@ export default function AssessmentCreatorPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
 
+    // Handle Copy to Clipboard
+    const handleCopy = useCallback(() => {
+        if (!generatedAssessment) {
+            toast({ title: "Nothing to Copy", description: "Generate an assessment first.", variant: "destructive" });
+            return;
+        }
+        if (!navigator.clipboard) {
+             toast({ title: "Copy Failed", description: "Clipboard API not available in your browser.", variant: "destructive" });
+             return;
+        }
+
+        navigator.clipboard.writeText(generatedAssessment)
+            .then(() => {
+                toast({ title: "Copied!", description: "Assessment copied to clipboard." });
+            })
+            .catch(err => {
+                console.error("Failed to copy text: ", err);
+                toast({ title: "Copy Failed", description: "Could not copy text to clipboard.", variant: "destructive" });
+            });
+    }, [generatedAssessment, toast]);
+
     // --- Get Auth State ---
     const { user, token, isAuthenticated, isLoading: isLoadingAuth } = useAuthStore();
 
@@ -72,7 +93,7 @@ export default function AssessmentCreatorPage() {
         setIsCheckingAiService(true);
         try {
             console.log("Checking AI service availability...");
-            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/health');
+            const response = await fetch('http://localhost:3004/api/ai/health');
             const data = await response.json();
             console.log("AI service health check:", data);
             setIsAiServiceAvailable(response.ok);
@@ -118,10 +139,10 @@ export default function AssessmentCreatorPage() {
 
         // --- Check if AI service is available ---
         if (isAiServiceAvailable === false) {
-            toast({ 
-                title: "AI Service Unavailable", 
-                description: "The AI service is not running. Please try again later or contact the LearnBridgEdu support Team.", 
-                variant: "destructive" 
+            toast({
+                title: "AI Service Unavailable",
+                description: "The AI service is not running. Please try again later or contact the LearnBridgEdu support Team.",
+                variant: "destructive"
             });
             setIsGenerating(false);
             return;
@@ -137,7 +158,7 @@ export default function AssessmentCreatorPage() {
 
         try {
             console.log("Sending request to AI service...");
-            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/assessment', {
+            const response = await fetch('http://localhost:3004/api/ai/generate/assessment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,18 +192,18 @@ export default function AssessmentCreatorPage() {
         } catch (error) {
             console.error("Network error generating assessment:", error);
             let errorMessage = "Could not connect to AI service.";
-            
+
             // Provide more specific error messages based on the error type
             if (error instanceof TypeError && error.message.includes('fetch')) {
                 errorMessage = "Could not connect to the AI service. Please check if the service is running.";
             } else if (error instanceof Error) {
                 errorMessage = `Error: ${error.message}`;
             }
-            
-            toast({ 
-                title: "Network Error", 
-                description: errorMessage, 
-                variant: "destructive" 
+
+            toast({
+                title: "Network Error",
+                description: errorMessage,
+                variant: "destructive"
             });
         } finally {
             setIsGenerating(false); // Use isGenerating state
@@ -214,7 +235,7 @@ export default function AssessmentCreatorPage() {
         console.log("Saving Assessment:", payload.subject, payload.topic);
 
         try {
-            const response = await fetch('https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools/assessments', { // http://localhost:3005/api/teacher-tools/assessments
+            const response = await fetch('http://localhost:3005/api/teacher-tools/assessments', { // http://localhost:3005/api/teacher-tools/assessments
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -305,9 +326,9 @@ export default function AssessmentCreatorPage() {
                             <div className="mt-2 p-2 bg-red-100 text-red-800 rounded-md text-sm">
                                 <p className="font-medium">AI Service Unavailable</p>
                                 <p>The AI service is not running. Please try again later or contact support.</p>
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
+                                <Button
+                                    variant="outline"
+                                    size="sm"
                                     className="mt-2 text-red-800 border-red-300 hover:bg-red-200"
                                     onClick={checkAiService}
                                     disabled={isCheckingAiService}
@@ -487,6 +508,19 @@ export default function AssessmentCreatorPage() {
                             </ScrollArea>
                         )}
                     </CardContent>
+                    {/* Add CardFooter with Copy Button */}
+                    <CardFooter className="flex flex-wrap items-start gap-2 pt-4">
+                        {generatedAssessment && (
+                            <Button
+                                variant="outline"
+                                onClick={handleCopy}
+                                disabled={isGenerating}
+                                title="Copy assessment content to clipboard"
+                            >
+                                <ClipboardCopy className="mr-2 h-4 w-4" /> Copy Assessment
+                            </Button>
+                        )}
+                    </CardFooter>
                 </Card>
             </div>
         </div>

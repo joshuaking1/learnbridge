@@ -28,5 +28,4 @@ declare module 'lucide-react' {
   export const Trash2: Icon;
   export const ArrowLeft: Icon;
   export const Upload: Icon;
-  export const FileText: Icon;
 }

@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 // --- CORRECTED IMPORT PATH for useToast ---
 import { useToast } from "@/hooks/use-toast";
+import { SchoolCombobox } from "@/components/ui/SchoolCombobox"; // Import SchoolCombobox
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,22 @@ import {
   FormMessage,
 } from "@/components/ui/form"; // Import form components
 
+// --- Define your list of common schools ---
+// IMPORTANT: In a real app, fetch this list from your backend/database
+const commonSchools = [
+  { value: "Accra High School", label: "Accra High School" },
+  { value: "Mfantsipim School", label: "Mfantsipim School" },
+  { value: "Prempeh College", label: "Prempeh College" },
+  { value: "Wesley Girls' High School", label: "Wesley Girls' High School" },
+  { value: "Presbyterian Boys' Secondary School (PRESEC)", label: "Presbyterian Boys' Secondary School (PRESEC)" },
+  { value: "Aburi Girls' Senior High School", label: "Aburi Girls' Senior High School" },
+  { value: "Adisadel College", label: "Adisadel College" },
+  { value: "Ghana Senior High School", label: "Ghana Senior High School" },
+  { value: "Achimota School", label: "Achimota School" },
+  { value: "St. Augustine's College", label: "St. Augustine's College" },
+];
+// --- End School List ---
+
 // Define validation schema using Zod
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
@@ -39,6 +56,13 @@ const formSchema = z.object({
   position: z.enum(["Teacher", "Student",  "Other"], { required_error: "Position is required."}), // Added required_error
   gender: z.enum(["Male", "Female", "Other", "Prefer not to say"], { required_error: "Gender is required."}), // Added required_error
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  // --- Add confirmPassword field ---
+  confirmPassword: z.string().min(6, { message: "Please confirm your password." })
+})
+// --- Add refine check ---
+.refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"], // Show error on the confirm password field
 });
 
 
@@ -60,6 +84,7 @@ export default function RegisterPage() {
       position: undefined, // Important for Select placeholder
       gender: undefined,
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -70,12 +95,15 @@ export default function RegisterPage() {
 
     try {
       // Make API call to backend auth-service
-      const response = await fetch('https://learnbridge-auth-service.onrender.com/api/auth/register', { // Use your Auth Service URL/Port
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...registrationData } = values;
+
+      const response = await fetch('http://localhost:3002/api/auth/register', { // Use your Auth Service URL/Port
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(values), // Send validated form values
+            body: JSON.stringify(registrationData), // Send validated form values without confirmPassword
         });
 
       const data = await response.json(); // Parse the JSON response body
@@ -138,10 +166,10 @@ export default function RegisterPage() {
                       <FormItem>
                         <div className="mb-1.5 text-sm font-medium text-gray-100">First Name *</div>
                         <FormControl>
-                          <Input 
-                            placeholder="e.g., Joshua" 
-                            {...field} 
-                            disabled={isLoading} 
+                          <Input
+                            placeholder="e.g., Joshua"
+                            {...field}
+                            disabled={isLoading}
                             className="bg-white/90 text-black placeholder:text-gray-500 h-11"
                           />
                         </FormControl>
@@ -158,10 +186,10 @@ export default function RegisterPage() {
                       <FormItem>
                         <div className="mb-1.5 text-sm font-medium text-gray-100">Surname *</div>
                         <FormControl>
-                          <Input 
-                            placeholder="e.g., Segu" 
-                            {...field} 
-                            disabled={isLoading} 
+                          <Input
+                            placeholder="e.g., Segu"
+                            {...field}
+                            disabled={isLoading}
                             className="bg-white/90 text-black placeholder:text-gray-500 h-11"
                           />
                         </FormControl>
@@ -179,11 +207,11 @@ export default function RegisterPage() {
                     <FormItem>
                       <div className="mb-1.5 text-sm font-medium text-gray-100">Email *</div>
                       <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="support@learnbridgedu.com" 
-                          {...field} 
-                          disabled={isLoading} 
+                        <Input
+                          type="email"
+                          placeholder="support@learnbridgedu.com"
+                          {...field}
+                          disabled={isLoading}
                           className="bg-white/90 text-black placeholder:text-gray-500 h-11"
                         />
                       </FormControl>
@@ -200,11 +228,11 @@ export default function RegisterPage() {
                     <FormItem>
                       <div className="mb-1.5 text-sm font-medium text-gray-100">Phone Number</div>
                       <FormControl>
-                        <Input 
-                          type="tel" 
-                          placeholder="+233 599 294 673" 
-                          {...field} 
-                          disabled={isLoading} 
+                        <Input
+                          type="tel"
+                          placeholder="+233 599 294 673"
+                          {...field}
+                          disabled={isLoading}
                           className="bg-white/90 text-black placeholder:text-gray-500 h-11"
                         />
                       </FormControl>
@@ -221,11 +249,11 @@ export default function RegisterPage() {
                     <FormItem>
                       <div className="mb-1.5 text-sm font-medium text-gray-100">Password *</div>
                       <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="********" 
-                          {...field} 
-                          disabled={isLoading} 
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                          disabled={isLoading}
                           className="bg-white/90 text-black placeholder:text-gray-500 h-11"
                         />
                       </FormControl>
@@ -234,21 +262,44 @@ export default function RegisterPage() {
                   )}
                 />
 
-                {/* School */}
+                {/* Confirm Password */}
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="mb-1.5 text-sm font-medium text-gray-100">Confirm Password *</div>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                          disabled={isLoading}
+                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-red-400 text-xs" />
+                    </FormItem>
+                  )}
+                />
+
+                {/* School (Using Combobox) */}
                 <FormField
                   control={form.control}
                   name="school"
                   render={({ field }) => (
                     <FormItem>
                       <div className="mb-1.5 text-sm font-medium text-gray-100">School</div>
-                      <FormControl>
-                        <Input 
-                          placeholder="e.g., Ghana Senior High School" 
-                          {...field} 
-                          disabled={isLoading} 
-                          className="bg-white/90 text-black placeholder:text-gray-500 h-11"
-                        />
-                      </FormControl>
+                      <SchoolCombobox
+                        schools={commonSchools}
+                        value={field.value || ""} // Pass form value
+                        onChange={field.onChange} // Update form value on change/select
+                        placeholder="Select or type your school..."
+                        searchPlaceholder="Search schools..."
+                        notFoundMessage="School not found. Type it below."
+                        allowCustom={true} // Allow typing custom school
+                        disabled={isLoading}
+                      />
                       <FormMessage className="text-red-400 text-xs" />
                     </FormItem>
                   )}
@@ -262,10 +313,10 @@ export default function RegisterPage() {
                     <FormItem>
                       <div className="mb-1.5 text-sm font-medium text-gray-100">Location</div>
                       <FormControl>
-                        <Input 
-                          placeholder="e.g., Koforidua, Eastern Region" 
-                          {...field} 
-                          disabled={isLoading} 
+                        <Input
+                          placeholder="e.g., Koforidua, Eastern Region"
+                          {...field}
+                          disabled={isLoading}
                           className="bg-white/90 text-black placeholder:text-gray-500 h-11"
                         />
                       </FormControl>
@@ -283,7 +334,7 @@ export default function RegisterPage() {
                       <FormItem>
                         <div className="mb-1.5 text-sm font-medium text-gray-100">Position *</div>
                         <FormControl>
-                          <select 
+                          <select
                             className="w-full rounded-md border border-input bg-white/90 text-black px-3 h-11 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             value={field.value}
                             onChange={field.onChange}
@@ -308,7 +359,7 @@ export default function RegisterPage() {
                       <FormItem>
                         <div className="mb-1.5 text-sm font-medium text-gray-100">Gender *</div>
                         <FormControl>
-                          <select 
+                          <select
                             className="w-full rounded-md border border-input bg-white/90 text-black px-3 h-11 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             value={field.value}
                             onChange={field.onChange}
@@ -328,9 +379,9 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold h-11 mt-6" 
+                <Button
+                  type="submit"
+                  className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold h-11 mt-6"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Registering...' : 'Create account'}
@@ -345,8 +396,8 @@ export default function RegisterPage() {
                 Sign in
               </Link>
             </div>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-sm text-center text-gray-300 hover:underline hover:text-white transition-colors"
             >
               Back to home

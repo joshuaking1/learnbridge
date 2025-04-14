@@ -1,7 +1,7 @@
 // frontend/src/app/dashboard/rubric-generator/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import * as z from "zod";
@@ -13,13 +13,14 @@ import remarkGfm from 'remark-gfm';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthStore } from '@/stores/useAuthStore';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Validation Schema for Rubric Inputs
 const rubricSchema = z.object({
@@ -42,6 +43,29 @@ export default function RubricGeneratorPage() {
     const { user, token, isAuthenticated, isLoading: isLoadingAuth } = useAuthStore();
     const [hasMounted, setHasMounted] = useState(false);
     useEffect(() => { setHasMounted(true); }, []);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
+
+    // Handle Copy to Clipboard
+    const handleCopy = useCallback(() => {
+        if (!generatedRubric) {
+            toast({ title: "Nothing to Copy", description: "Generate a rubric first.", variant: "destructive" });
+            return;
+        }
+        if (!navigator.clipboard) {
+             toast({ title: "Copy Failed", description: "Clipboard API not available in your browser.", variant: "destructive" });
+             return;
+        }
+
+        navigator.clipboard.writeText(generatedRubric)
+            .then(() => {
+                toast({ title: "Copied!", description: "Rubric copied to clipboard." });
+            })
+            .catch(err => {
+                console.error("Failed to copy text: ", err);
+                toast({ title: "Copy Failed", description: "Could not copy text to clipboard.", variant: "destructive" });
+            });
+    }, [generatedRubric, toast]);
     useEffect(() => {
         if (hasMounted && !isLoadingAuth && !isAuthenticated) {
             toast({ title: "Authentication Required", variant: "destructive" });
@@ -66,12 +90,13 @@ export default function RubricGeneratorPage() {
     async function onSubmit(values: RubricFormValues) {
         setIsGenerating(true);
         setGeneratedRubric(null);
+        setSaveSuccess(null);
         console.log("Requesting Rubric:", values);
 
         if (!token) { /* ... auth token check ... */ return; }
 
         try {
-            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/rubric', { // AI Service URL
+            const response = await fetch('http://localhost:3004/api/ai/generate/rubric', { // AI Service URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,6 +127,47 @@ export default function RubricGeneratorPage() {
             setIsGenerating(false);
         }
     }
+    // --- NEW: Handle Save Rubric ---
+    const handleSaveRubric = async () => {
+        if (!generatedRubric || isSaving) return;
+        if (!token) { /* ... auth token check ... */ return; }
+
+        setIsSaving(true);
+        setSaveSuccess(null);
+        const currentInputs = form.getValues();
+
+        const payload = {
+            // title: `Rubric: ${currentInputs.assessmentTitle.substring(0,30)}...`, // Optional: Add title field later
+            assessmentTitle: currentInputs.assessmentTitle,
+            assessmentType: currentInputs.assessmentType,
+            classLevel: currentInputs.classLevel,
+            taskDescription: currentInputs.taskDescription,
+            maxScore: currentInputs.maxScore ? Number(currentInputs.maxScore) : null,
+            rubricContent: generatedRubric // The generated Markdown
+        };
+        console.log("Saving Rubric:", payload.assessmentTitle);
+
+        try {
+            const response = await fetch('http://localhost:3005/api/teacher-tools/rubrics', { // Use new Rubric endpoint
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setSaveSuccess(false);
+                toast({ title: `Save Failed (${response.status})`, description: data.error || "Error saving rubric.", variant: "destructive" });
+            } else {
+                setSaveSuccess(true);
+                toast({ title: "Rubric Saved!", description: `Rubric for "${payload.assessmentTitle}" saved.` });
+            }
+        } catch (error) {
+            setSaveSuccess(false);
+            toast({ title: "Network Error", description: "Could not connect to server to save rubric.", variant: "destructive" });
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     // --- Render Logic ---
     if (!hasMounted || isLoadingAuth) { /* ... loading state ... */
@@ -223,17 +289,17 @@ export default function RubricGeneratorPage() {
                         )}
                         {!isGenerating && !generatedRubric && (
                             <div className="flex items-center justify-center h-[70vh] text-gray-500">
-                                <p>Fill out the form and click &quot;Generate Rubric&quot; to create a rubric.</p>
+                                <p>Fill out the form and click "Generate Rubric" to create a rubric.</p>
                             </div>
                         )}
                         {generatedRubric && (
                             <ScrollArea className="h-[70vh] p-4 border rounded-md bg-white">
                                 <div className="prose prose-sm sm:prose-base max-w-none">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ /* ...table styling components... */
-                                        table: ({...props}) => <table className="table-auto w-full border-collapse border border-slate-400" {...props} />,
-                                        thead: ({...props}) => <thead className="bg-slate-100" {...props} />,
-                                        th: ({...props}) => <th className="border border-slate-300 px-2 py-1 text-left" {...props} />,
-                                        td: ({...props}) => <td className="border border-slate-300 px-2 py-1 align-top" {...props} />, // Added align-top
+                                        table: ({node, ...props}) => <table className="table-auto w-full border-collapse border border-slate-400" {...props} />,
+                                        thead: ({node, ...props}) => <thead className="bg-slate-100" {...props} />,
+                                        th: ({node, ...props}) => <th className="border border-slate-300 px-2 py-1 text-left" {...props} />,
+                                        td: ({node, ...props}) => <td className="border border-slate-300 px-2 py-1 align-top" {...props} />, // Added align-top
                                     }}>
                                         {generatedRubric}
                                     </ReactMarkdown>
@@ -241,6 +307,46 @@ export default function RubricGeneratorPage() {
                             </ScrollArea>
                         )}
                     </CardContent>
+                     {/* --- ADD SAVE BUTTON / STATUS --- */}
+                     <CardFooter className="flex flex-wrap items-start gap-2 pt-4">
+                        <div className="flex flex-col space-y-2">
+                            {generatedRubric && (
+                                <Button onClick={handleSaveRubric} disabled={isSaving || saveSuccess === true} className="bg-green-600 hover:bg-green-700">
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    {isSaving ? 'Saving...' : saveSuccess === true ? 'Saved!' : 'Save Rubric'}
+                                </Button>
+                            )}
+                            {saveSuccess === false && (
+                                <Alert variant="destructive" className="w-full max-w-xs">
+                                    <AlertTitle>Save Failed</AlertTitle>
+                                    <AlertDescription>
+                                        There was an error saving the rubric. Please try again.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            {saveSuccess === true && (
+                                <Alert variant="default" className="w-full max-w-xs bg-green-100 border-green-300 text-green-800">
+                                    <AlertTitle>Success</AlertTitle>
+                                    <AlertDescription>
+                                        Rubric saved successfully.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+
+                        {/* Copy Button */}
+                        {generatedRubric && (
+                            <Button
+                                variant="outline"
+                                onClick={handleCopy}
+                                disabled={isSaving || isGenerating}
+                                title="Copy rubric content to clipboard"
+                            >
+                                <ClipboardCopy className="mr-2 h-4 w-4" /> Copy Rubric
+                            </Button>
+                        )}
+                    </CardFooter>
+                    {/* --- END SAVE BUTTON / STATUS --- */}
                 </Card>
             </div>
         </div>

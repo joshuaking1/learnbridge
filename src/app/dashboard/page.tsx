@@ -41,10 +41,10 @@ interface User {
 export default function DashboardPage() {
     const router = useRouter();
     const { toast } = useToast();
-    
+
     // --- State to prevent hydration mismatch ---
     const [hasMounted, setHasMounted] = useState(false);
-    
+
     // --- Get state and actions from the store ---
     // Only access auth state after component has mounted
     const { user, isAuthenticated, isLoading: isLoadingAuth, clearAuth } = useAuthStore();
@@ -52,10 +52,10 @@ export default function DashboardPage() {
     // --- Effect to set hasMounted on client ---
     useEffect(() => {
         setHasMounted(true);
-        console.log("Component mounted, auth state:", { 
-            isLoading: isLoadingAuth, 
-            isAuthenticated, 
-            hasUser: !!user 
+        console.log("Component mounted, auth state:", {
+            isLoading: isLoadingAuth,
+            isAuthenticated,
+            hasUser: !!user
         });
     }, [isAuthenticated, user, isLoadingAuth]);
 
@@ -89,13 +89,13 @@ export default function DashboardPage() {
 
     // --- Render dashboard ---
     return (
-        <div className="bg-gradient-to-br from-brand-darkblue to-brand-midblue p-2 sm:p-4">
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-2 sm:p-4">
             <div className="container mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
                     <h1 className="text-2xl sm:text-3xl font-arvo font-bold text-white">
                         Welcome, {user?.first_name || 'User'}
                     </h1>
-                    <Button 
+                    <Button
                         onClick={handleLogout}
                         variant="outline"
                         className="bg-white/10 hover:bg-white/20 text-white border-white/20 w-full sm:w-auto"
@@ -104,50 +104,53 @@ export default function DashboardPage() {
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {/* Dashboard Cards */}
-                    <Link href="/dashboard/lesson-planner" className="block">
-                        <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
-                            <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">Lesson Planner</h2>
-                            <p className="text-white/80 text-sm sm:text-base">Create and manage your lesson plans with AI assistance</p>
-                        </div>
-                    </Link>
+                {/* Teacher Tools - Only visible to teachers */}
+                {user && user.role === 'teacher' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {/* Dashboard Cards */}
+                        <Link href="/dashboard/lesson-planner" className="block">
+                            <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
+                                <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">Lesson Planner</h2>
+                                <p className="text-white/80 text-sm sm:text-base">Create and manage your lesson plans with AI assistance</p>
+                            </div>
+                        </Link>
 
-                    <Link href="/dashboard/my-lessons" className="block">
-                        <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
-                            <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">My Lessons</h2>
-                            <p className="text-white/80 text-sm sm:text-base">View and manage your saved lesson plans</p>
-                        </div>
-                    </Link>
+                        <Link href="/dashboard/my-lessons" className="block">
+                            <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
+                                <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">My Lessons</h2>
+                                <p className="text-white/80 text-sm sm:text-base">View and manage your saved lesson plans</p>
+                            </div>
+                        </Link>
 
-                    <Link href="/dashboard/assessment-creator" className="block">
-                        <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
-                            <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">Assessment Creator</h2>
-                            <p className="text-white/80 text-sm sm:text-base">Generate assessments and quizzes for your students</p>
-                        </div>
-                    </Link>
+                        <Link href="/dashboard/assessment-creator" className="block">
+                            <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
+                                <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">Assessment Creator</h2>
+                                <p className="text-white/80 text-sm sm:text-base">Generate assessments and quizzes for your students</p>
+                            </div>
+                        </Link>
 
-                    <Link href="/dashboard/my-assessments" className="block">
-                        <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
-                            <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">My Assessments</h2>
-                            <p className="text-white/80 text-sm sm:text-base">View and manage your saved assessments</p>
-                        </div>
-                    </Link>
+                        <Link href="/dashboard/my-assessments" className="block">
+                            <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
+                                <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">My Assessments</h2>
+                                <p className="text-white/80 text-sm sm:text-base">View and manage your saved assessments</p>
+                            </div>
+                        </Link>
 
-                    <Link href="/dashboard/rubric-generator" className="block">
-                        <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
-                            <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">Rubric Generator</h2>
-                            <p className="text-white/80 text-sm sm:text-base">Create grading rubrics for your assessments</p>
-                        </div>
-                    </Link>
+                        <Link href="/dashboard/rubric-generator" className="block">
+                            <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
+                                <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">Rubric Generator</h2>
+                                <p className="text-white/80 text-sm sm:text-base">Create grading rubrics for your assessments</p>
+                            </div>
+                        </Link>
 
-                    <Link href="/dashboard/tos-builder" className="block">
-                        <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
-                            <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">TOS Builder</h2>
-                            <p className="text-white/80 text-sm sm:text-base">Generate terms of service for your educational content</p>
-                        </div>
-                    </Link>
-                </div>
+                        <Link href="/dashboard/tos-builder" className="block">
+                            <div className="bg-white/10 backdrop-blur-sm p-4 sm:p-6 rounded-lg border border-white/20 hover:bg-white/20 transition-all">
+                                <h2 className="text-lg sm:text-xl font-arvo font-bold text-white mb-2">TOS Builder</h2>
+                                <p className="text-white/80 text-sm sm:text-base">Generate terms of service for your educational content</p>
+                            </div>
+                        </Link>
+                    </div>
+                )}
 
                 {/* AI Chat Interface */}
                 <div className="mt-6 sm:mt-8">
@@ -155,6 +158,50 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Role-specific content */}
+                {/* --- UPDATED Student Hub Block --- */}
+                {user && user.role === 'student' && (
+                    <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6">
+                        <div className="p-6 bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 hover:bg-white/15 transition-all space-y-3">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-brand-orange/20 p-2 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-semibold text-brand-orange">Student Hub</h3>
+                            </div>
+                            <p className="text-slate-200 ml-11">Access curriculum content, track your progress, and get AI help with your studies.</p>
+                            <div className="flex flex-wrap gap-2 mt-4 ml-11">
+                                <Link href="/dashboard/student-hub">
+                                    <Button variant="secondary" className="bg-brand-orange text-white hover:bg-brand-orange/90">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                        Browse SBC Content
+                                    </Button>
+                                </Link>
+                                <Link href="/dashboard/student-hub?tab=progress">
+                                    <Button variant="secondary" className="bg-blue-600 text-white hover:bg-blue-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        My Progress
+                                    </Button>
+                                </Link>
+                                <Link href="/dashboard/student-hub/quizzes">
+                                    <Button variant="secondary" className="bg-purple-600 text-white hover:bg-purple-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                        </svg>
+                                        Browse Quizzes
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* --- END Student Hub Block --- */}
+
                 {user && user.role === 'admin' && (
                     <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6">
                         <div className="p-4 sm:p-6 bg-white border rounded-lg shadow space-y-3">
@@ -225,15 +272,15 @@ function StudentContentViewer() {
         }
 
         try {
-            const response = await fetch(`https://content-service-e54f.onrender.com/api/content/student-material?${params.toString()}`, {
+            const response = await fetch(`http://localhost:3003/api/content/student-material?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 
             if (!response.ok) {
                 let errorMsg = `Failed to fetch content (Status: ${response.status})`;
-                try { 
-                    const data = await response.json(); 
-                    errorMsg = data.error || errorMsg; 
+                try {
+                    const data = await response.json();
+                    errorMsg = data.error || errorMsg;
                 } catch {
                     // Ignore JSON parse error
                 }
@@ -247,10 +294,10 @@ function StudentContentViewer() {
             console.error("Error fetching student content:", error);
             const errorMessage = error instanceof Error ? error.message : "Could not load learning material.";
             setErrorLoadingContent(errorMessage);
-            toast({ 
-                title: "Loading Error", 
-                description: errorMessage, 
-                variant: "destructive" 
+            toast({
+                title: "Loading Error",
+                description: errorMessage,
+                variant: "destructive"
             });
         } finally {
             setIsLoadingContent(false);
@@ -312,7 +359,7 @@ function StudentContentViewer() {
                 {/* Content Display Area */}
                 <div className="mt-4 space-y-4">
                     {isLoadingContent && (
-                        <div className="flex justify-center items-center py-6"><Loader2 className="h-6 w-6 animate-spin text-brand-midblue" /></div>
+                        <div className="flex justify-center items-center py-6"><Loader2 className="h-6 w-6 animate-spin text-blue-500" /></div>
                     )}
                     {!isLoadingContent && errorLoadingContent && (
                         <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertTitle>Error</AlertTitle><AlertDescription>{errorLoadingContent}</AlertDescription></Alert>

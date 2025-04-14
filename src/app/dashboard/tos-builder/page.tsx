@@ -1,7 +1,7 @@
 // frontend/src/app/dashboard/tos-builder/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import * as z from "zod";
@@ -14,14 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 // Label import removed
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast"; // Fixed useToast import path
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthStore } from '@/stores/useAuthStore'; // Corrected store import path
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Validation Schema for ToS Inputs - Updated
 const tosSchema = z.object({
@@ -50,6 +51,30 @@ export default function TosBuilderPage() {
 
     // --- State to prevent hydration mismatch ---
     const [hasMounted, setHasMounted] = useState(false);
+
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
+
+    // Handle Copy to Clipboard
+    const handleCopy = useCallback(() => {
+        if (!generatedTos) {
+            toast({ title: "Nothing to Copy", description: "Generate a Table of Specifications first.", variant: "destructive" });
+            return;
+        }
+        if (!navigator.clipboard) {
+             toast({ title: "Copy Failed", description: "Clipboard API not available in your browser.", variant: "destructive" });
+             return;
+        }
+
+        navigator.clipboard.writeText(generatedTos)
+            .then(() => {
+                toast({ title: "Copied!", description: "Table of Specifications copied to clipboard." });
+            })
+            .catch(err => {
+                console.error("Failed to copy text: ", err);
+                toast({ title: "Copy Failed", description: "Could not copy text to clipboard.", variant: "destructive" });
+            });
+    }, [generatedTos, toast]);
 
     // --- Effect to set hasMounted on client ---
     useEffect(() => {
@@ -88,7 +113,7 @@ export default function TosBuilderPage() {
             const fetchBooks = async () => {
                 setIsLoadingBooks(true);
                 try {
-                    const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/processed-documents', {
+                    const response = await fetch('http://localhost:3004/api/ai/processed-documents', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     });
                     if (!response.ok) throw new Error('Failed to fetch book list');
@@ -123,6 +148,7 @@ export default function TosBuilderPage() {
     async function onSubmit(values: TosFormValues) {
         setIsGenerating(true);
         setGeneratedTos(null);
+        setSaveSuccess(null);
 
         const coveredTopics = values.coveredTopicsString
                                 ? values.coveredTopicsString
@@ -143,14 +169,14 @@ export default function TosBuilderPage() {
         console.log("Requesting Table of Specifications:", payload);
 
         if (!token) {
-             toast({ title: "Authentication Error", description: "Token not found. Please log in again.", variant: "destructive" });
+             toast({ title: "Authentication Error", description: "Session expired. Please log in again.", variant: "destructive" });
              router.push('/login');
              setIsGenerating(false);
              return;
         }
 
         try {
-            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/tos', {
+            const response = await fetch('http://localhost:3004/api/ai/generate/tos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -184,6 +210,51 @@ export default function TosBuilderPage() {
             setIsGenerating(false);
         }
     }
+    // --- NEW: Handle Save ToS ---
+    const handleSaveTos = async () => {
+        if (!generatedTos || isSaving) return;
+        if (!token) { /* ... auth token check ... */ return; }
+
+        setIsSaving(true);
+        setSaveSuccess(null);
+        const currentInputs = form.getValues();
+        const coveredTopics = currentInputs.coveredTopicsString
+                                ? currentInputs.coveredTopicsString.split('\n').map(t => t.trim()).filter(t => t.length > 0)
+                                : [];
+
+        const payload = {
+            // title: `ToS: ${currentInputs.assessmentTitle.substring(0,30)}...`, // Optional: Add title field later
+            subject: currentInputs.subject,
+            book: currentInputs.book,
+            assessmentTitle: currentInputs.assessmentTitle,
+            coveredTopics: coveredTopics,
+            objectiveWeight: currentInputs.objectiveWeight,
+            subjectiveWeight: 100 - currentInputs.objectiveWeight,
+            tosContent: generatedTos // The generated Markdown
+        };
+        console.log("Saving ToS:", payload.subject, payload.assessmentTitle);
+
+        try {
+            const response = await fetch('http://localhost:3005/api/teacher-tools/tos', { // Use new ToS endpoint
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setSaveSuccess(false);
+                toast({ title: `Save Failed (${response.status})`, description: data.error || "Error saving ToS.", variant: "destructive" });
+            } else {
+                setSaveSuccess(true);
+                toast({ title: "ToS Saved!", description: `Table of Specs for "${payload.assessmentTitle}" saved.` });
+            }
+        } catch (error) {
+            setSaveSuccess(false);
+            toast({ title: "Network Error", description: "Could not connect to server to save ToS.", variant: "destructive" });
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
      // --- Initial Render (Pre-Mount/Hydration) ---
      if (!hasMounted) { return null; }
@@ -357,6 +428,46 @@ export default function TosBuilderPage() {
                             </ScrollArea>
                         )}
                     </CardContent>
+                    {/* --- ADD SAVE BUTTON / STATUS --- */}
+                    <CardFooter className="flex flex-wrap items-start gap-2 pt-4">
+                        <div className="flex flex-col space-y-2">
+                            {generatedTos && (
+                                <Button onClick={handleSaveTos} disabled={isSaving || saveSuccess === true} className="bg-green-600 hover:bg-green-700">
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    {isSaving ? 'Saving...' : saveSuccess === true ? 'Saved!' : 'Save Table of Specs'}
+                                </Button>
+                            )}
+                            {saveSuccess === false && (
+                                <Alert variant="destructive" className="w-full max-w-xs">
+                                    <AlertTitle>Save Failed</AlertTitle>
+                                    <AlertDescription>
+                                        There was an error saving the Table of Specifications. Please try again.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            {saveSuccess === true && (
+                                <Alert variant="success" className="w-full max-w-xs bg-green-100 border-green-300 text-green-800">
+                                    <AlertTitle>Success</AlertTitle>
+                                    <AlertDescription>
+                                        Table of Specifications saved successfully.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+
+                        {/* Copy Button */}
+                        {generatedTos && (
+                            <Button
+                                variant="outline"
+                                onClick={handleCopy}
+                                disabled={isSaving || isGenerating}
+                                title="Copy Table of Specifications to clipboard"
+                            >
+                                <ClipboardCopy className="mr-2 h-4 w-4" /> Copy Table of Specs
+                            </Button>
+                        )}
+                    </CardFooter>
+                    {/* --- END SAVE BUTTON / STATUS --- */}
                 </Card>
             </div>
         </div>

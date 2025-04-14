@@ -1,7 +1,7 @@
 // frontend/src/app/dashboard/lesson-planner/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import * as z from "zod";
@@ -16,20 +16,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast"; // Corrected path
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardCopy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuthStore } from '@/stores/useAuthStore'; // Corrected path
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Validation Schema
+// Validation Schema - Updated
 const lessonPlanSchema = z.object({
     subject: z.string().min(3, { message: "Subject is required (min 3 chars)." }),
     classLevel: z.string().min(1, { message: "Class Level is required." }),
     topic: z.string().min(5, { message: "Topic is required (min 5 chars)." }),
     duration: z.string().min(3, { message: "Duration is required (e.g., 45 minutes)." }),
     strand: z.string().min(3, { message: "Strand is required." }),
-    subStrand: z.string().min(3, { message: "Sub-strand is required." }),
-    contentStandard: z.string().min(5, { message: "Content Standard is required (e.g., B7.1.1.1)." }),
+    subStrand: z.string().optional(), // <-- Make optional
+    week: z.string().min(1, { message: "Week is required (e.g., Week 1)." }), // <-- Renamed from contentStandard
 });
 
 type LessonPlanFormValues = z.infer<typeof lessonPlanSchema>;
@@ -63,7 +63,8 @@ export default function LessonPlannerPage() {
         resolver: zodResolver(lessonPlanSchema),
         defaultValues: {
             subject: "", classLevel: "", topic: "", duration: "45 minutes",
-            strand: "", subStrand: "", contentStandard: "",
+            strand: "", subStrand: "", // Optional, default empty
+            week: "", // Renamed from contentStandard
         },
     });
 
@@ -75,7 +76,7 @@ export default function LessonPlannerPage() {
         console.log("Requesting Lesson Plan:", values);
         if (!token) { /* ... auth check ... */ return; }
         try {
-            const response = await fetch('https://learnbridge-ai-service.onrender.com/api/ai/generate/lesson-plan', { //'http://localhost:3004/api/ai/generate/lesson-plan
+            const response = await fetch('http://localhost:3004/api/ai/generate/lesson-plan', { //'http://localhost:3004/api/ai/generate/lesson-plan
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(values),
@@ -106,12 +107,14 @@ export default function LessonPlannerPage() {
         const currentInputs = form.getValues();
         const payload = {
             subject: currentInputs.subject, classLevel: currentInputs.classLevel, topic: currentInputs.topic,
-            duration: currentInputs.duration, strand: currentInputs.strand, subStrand: currentInputs.subStrand,
-            contentStandard: currentInputs.contentStandard, planContent: generatedPlan
+            duration: currentInputs.duration, strand: currentInputs.strand,
+            subStrand: currentInputs.subStrand, // Send optional subStrand
+            week: currentInputs.week, // <-- Send week instead of contentStandard
+            planContent: generatedPlan
         };
         console.log("Saving Lesson Plan:", payload.subject, payload.topic);
         try {
-            const response = await fetch('https://learnbridge-teacher-tools-service.onrender.com/api/teacher-tools/lessons', {
+            const response = await fetch('http://localhost:3005/api/teacher-tools/lessons', {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                  body: JSON.stringify(payload),
@@ -134,6 +137,27 @@ export default function LessonPlannerPage() {
             setIsSaving(false);
         }
     };
+
+    // --- NEW: Handle Copy ---
+    const handleCopy = useCallback(() => {
+        if (!generatedPlan) {
+            toast({ title: "Nothing to Copy", description: "Generate a plan first.", variant: "destructive" });
+            return;
+        }
+        if (!navigator.clipboard) {
+             toast({ title: "Copy Failed", description: "Clipboard API not available in your browser.", variant: "destructive" });
+             return;
+        }
+
+        navigator.clipboard.writeText(generatedPlan)
+            .then(() => {
+                toast({ title: "Copied!", description: "Lesson plan copied to clipboard." });
+            })
+            .catch(err => {
+                console.error("Failed to copy text: ", err);
+                toast({ title: "Copy Failed", description: "Could not copy text to clipboard.", variant: "destructive" });
+            });
+    }, [generatedPlan, toast]); // Dependencies
 
 
     // --- RENDER LOGIC ---
@@ -205,13 +229,13 @@ export default function LessonPlannerPage() {
                                 <FormField control={form.control} name="strand" render={({ field }) => (
                                     <FormItem> <FormLabel>Strand *</FormLabel> <FormControl><Input placeholder="e.g., Diversity of Matter" {...field} disabled={isGenerating} /></FormControl> <FormMessage /> </FormItem>
                                 )} />
-                                 {/* Sub-strand */}
+                                 {/* Sub-strand (Optional) */}
                                 <FormField control={form.control} name="subStrand" render={({ field }) => (
-                                    <FormItem> <FormLabel>Sub-strand *</FormLabel> <FormControl><Input placeholder="e.g., Cycles" {...field} disabled={isGenerating} /></FormControl> <FormMessage /> </FormItem>
+                                    <FormItem> <FormLabel>Sub-strand (Optional)</FormLabel> <FormControl><Input placeholder="e.g., Cycles" {...field} disabled={isGenerating} /></FormControl> <FormMessage /> </FormItem>
                                 )} />
-                                 {/* Content Standard */}
-                                <FormField control={form.control} name="contentStandard" render={({ field }) => (
-                                    <FormItem> <FormLabel>Content Standard *</FormLabel> <FormControl><Textarea placeholder="e.g., B7.2.1.1: Demonstrate understanding..." {...field} rows={3} disabled={isGenerating} /></FormControl> <FormMessage /> </FormItem>
+                                 {/* Week (was Content Standard) */}
+                                <FormField control={form.control} name="week" render={({ field }) => (
+                                    <FormItem> <FormLabel>Week *</FormLabel> <FormControl><Input placeholder="e.g., Week 1, Unit 3" {...field} disabled={isGenerating} /></FormControl> <FormMessage /> </FormItem>
                                 )} />
 
                                 <Button type="submit" className="w-full bg-brand-orange hover:bg-brand-orange/90" disabled={isGenerating}>
@@ -266,32 +290,47 @@ export default function LessonPlannerPage() {
                         )}
                     </CardContent>
                     {/* Save Button / Status Area */}
-                    <CardFooter className="flex flex-col items-start space-y-2 pt-4">
-                        {generatedPlan && ( // Only show if a plan exists
+                    <CardFooter className="flex flex-wrap items-start gap-2 pt-4"> {/* Use flex-wrap and gap */}
+                        {/* Save Button / Status */}
+                        <div className="flex flex-col space-y-2"> {/* Group save button and status */}
+                            {generatedPlan && ( // Only show if a plan exists
+                                <Button
+                                    onClick={handleSavePlan}
+                                    disabled={isSaving || saveSuccess === true}
+                                    className="bg-green-600 hover:bg-green-700"
+                                >
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    {isSaving ? 'Saving...' : saveSuccess === true ? 'Saved!' : 'Save Lesson Plan'}
+                                </Button>
+                            )}
+                            {saveSuccess === false && (
+                                <Alert variant="destructive" className="w-full max-w-xs">
+                                    <AlertTitle>Save Failed</AlertTitle>
+                                    <AlertDescription>
+                                        There was an error saving the lesson plan. Please try again.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            {saveSuccess === true && (
+                                <Alert variant="success" className="w-full max-w-xs bg-green-100 border-green-300 text-green-800">
+                                    <AlertTitle>Success</AlertTitle>
+                                    <AlertDescription>
+                                        Lesson plan saved successfully. You can view it in "My Lesson Plans".
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </div>
+
+                        {/* Copy Button */}
+                        {generatedPlan && ( // Only show if plan exists
                             <Button
-                                onClick={handleSavePlan}
-                                disabled={isSaving || saveSuccess === true}
-                                className="bg-green-600 hover:bg-green-700"
+                                variant="outline"
+                                onClick={handleCopy}
+                                disabled={isSaving || isGenerating} // Disable while saving or generating
+                                title="Copy plan content to clipboard"
                             >
-                                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                {isSaving ? 'Saving...' : saveSuccess === true ? 'Saved!' : 'Save Lesson Plan'}
+                                <ClipboardCopy className="mr-2 h-4 w-4" /> Copy Plan
                             </Button>
-                        )}
-                        {saveSuccess === false && (
-                            <Alert variant="destructive" className="w-full">
-                                <AlertTitle>Save Failed</AlertTitle>
-                                <AlertDescription>
-                                    There was an error saving the lesson plan. Please try again.
-                                </AlertDescription>
-                            </Alert>
-                        )}
-                         {saveSuccess === true && (
-                            <Alert variant="success" className="w-full bg-green-100 border-green-300 text-green-800">
-                                <AlertTitle>Success</AlertTitle>
-                                <AlertDescription>
-                                    Lesson plan saved successfully. You can view it in "My Lesson Plans".
-                                </AlertDescription>
-                            </Alert>
                         )}
                     </CardFooter>
                 </Card>
