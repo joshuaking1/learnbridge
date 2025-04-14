@@ -19,7 +19,7 @@ export default function Home() {
           <Link href="/register" className="bg-white hover:bg-gray-200 text-brand-darkblue font-bold py-2 px-6 rounded transition duration-300">
             Register
           </Link>
-           {/* We will add Teacher/Student dashboard links later */}
+           {/* We will add Teacher/Student dashboard links later okay */}
         </div>
       </div>
     </main>
